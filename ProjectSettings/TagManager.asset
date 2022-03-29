@@ -12,6 +12,7 @@ TagManager:
   - PCP
   - LinkedVisualisation
   - Controller
+  - Interactable
   layers:
   - Default
   - TransparentFX
