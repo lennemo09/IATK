@@ -293,7 +293,9 @@ Shader "IATK/OutlineDots"
                     else
                         output.color = tex2D(_MainTex, input.tex0.xy) * input.color;;
 
-                    output.depth = output.color.a > 0.5 ? input.pos.z : 0;
+                    //output.depth = output.color.a > 0.5 ? input.pos.z : 0;
+
+					output.color.a = output.color.a * 0.0001;
 
                     return output;
                 }
