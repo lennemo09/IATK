@@ -49,28 +49,28 @@ public class Haptics : MonoBehaviour
     void RightGripPressed(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
     {
         rightGripPressed = true;
-        print("Right Grip is pressed.");
+        //print("Right Grip is pressed.");
 
     }
 
     void LeftGripPressed(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
     {
         leftGripPressed = true;
-        print("Left Grip is pressed.");
+        //print("Left Grip is pressed.");
 
     }
 
     void RightGripRelease(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
     {
         rightGripPressed = false;
-        print("Right Grip is released.");
+        //print("Right Grip is released.");
 
     }
 
     void LeftGripRelease(SteamVR_Action_Boolean fromAction, SteamVR_Input_Sources fromSource)
     {
         leftGripPressed = false;
-        print("Left Grip is released.");
+        //print("Left Grip is released.");
 
     }
 
@@ -78,7 +78,7 @@ public class Haptics : MonoBehaviour
     {
         hapticAction.Execute(0, duration, frequency, amplitude, source);
 
-        print("Grip pressed, " + source.ToString());
+        //print("Grip pressed, " + source.ToString());
     }
 
     private float GetDensityInCube(GameObject source)
@@ -87,7 +87,8 @@ public class Haptics : MonoBehaviour
         int cubeLength = cube.GetLength(0);
 
         Vector3 cubeOrigin = new Vector3(-.5f, -.5f, -.5f);
-        Vector3 handPosition = source.transform.position;
+        Vector3 handPosition = transform.InverseTransformPoint(source.transform.position);
+        //Vector3 handPosition = source.transform.position;
 
         Vector3 handInCube = handPosition - cubeOrigin;
 
@@ -102,7 +103,7 @@ public class Haptics : MonoBehaviour
             print("Hand in cube at " + xBin.ToString() + "|" + yBin.ToString() + "|" + zBin.ToString() +  ", density: " + density.ToString());
             return density;
         }
-        print("Hand not in cube");
+        print(handPosition.ToString());
         return 0f;
     }
 }
