@@ -1,0 +1,97 @@
+﻿#pragma kernel GaussianComputeMain
+#define PI 3.14159265358979323846
+
+StructuredBuffer<float3> _PointsBuffer;
+StructuredBuffer<int> _KernelSizeBuffer;
+StructuredBuffer<float> _HapticsBuffer;
+RWStructuredBuffer<float> _DensityBuffer;
+
+int _texDepth;
+
+float _coefIntensity;
+float _mu;
+float _sigma;
+
+int round(float f) {
+	return floor(f + 0.5);
+}
+
+float gauss(float x, float mu, float sigma)
+{
+	return 1.0f / sqrt(2.0f * sigma * sigma * PI) * exp(-((x - mu) * (x - mu)) / (2.0f * sigma * sigma));
+}
+
+//brush sphere
+bool brushSphere(float3 center, float radius, float3 testPoint)
+{
+	float3 displacementToCenter = testPoint - center;
+	float radiusSqr = radius;
+	float magnitude = length(displacementToCenter);
+	bool intersects = magnitude < radiusSqr;
+
+	return intersects;
+}
+
+int GetIndex(uint3 id) {
+	int idx = id.x;
+	return idx;
+}
+
+void SetDensity(int i) {
+
+	// find the depth bin
+	int depthBin = round(_PointsBuffer[i].z * _texDepth);
+	int xCenter = round(_PointsBuffer[i].x * _texDepth);
+	int yCenter = round(_PointsBuffer[i].y * _texDepth);
+
+	float3 center;
+	center.x = xCenter;
+	center.y = yCenter;
+	center.z = depthBin;
+
+	int kernelSize = _KernelSizeBuffer[i];
+
+	float3 origin;
+	origin.x = xCenter - kernelSize;
+	origin.y = yCenter - kernelSize;
+	origin.z = depthBin - kernelSize;
+
+	float distanceMax = distance(origin, center);
+
+	for (int z = origin.z; z < depthBin + kernelSize; z++)
+	{
+		for (int x = origin.x; x < xCenter + kernelSize; x++)
+		{
+			for (int y = origin.y; y < yCenter + kernelSize; y++)
+			{
+				//test we are still in the matrix:
+				if (z >= 0 && z < _texDepth && x >= 0 && x < _texDepth && y >= 0 && y < _texDepth)
+				{
+					int3 kernelPoint;
+					kernelPoint.x = x;
+					kernelPoint.y = y;
+					kernelPoint.z = z;
+
+					if (brushSphere(center, (float)kernelSize, kernelPoint))
+					{
+						float dist = distance(kernelPoint, center);
+						dist = dist / distanceMax;
+
+						//apply kernel
+
+						float gaussianValue = gauss(dist, _mu, _sigma);
+
+						_DensityBuffer[x + (y * _texDepth) + (z * _texDepth * _texDepth)] += _HapticsBuffer[i] * gaussianValue * _coefIntensity;
+
+					}
+				}
+			}
+		}
+	}
+}
+
+[numthreads(1024,1,1)]
+void GaussianComputeMain(uint3 id : SV_DispatchThreadID)
+{
+	SetDensity(GetIndex(id));
+}

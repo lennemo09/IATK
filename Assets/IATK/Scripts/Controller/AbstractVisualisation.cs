@@ -54,7 +54,16 @@ namespace IATK
         {
             VertexId,
             Size,
-            Filter
+            Filter,
+            Custom
+        }
+
+        public enum TangentChannel
+        {
+            X,
+            Y,
+            Z,
+            W
         }
 
         public enum VisualisationTypes {

@@ -175,6 +175,18 @@ namespace IATK
             else return normValue;
         }
 
+        public object getMaxOriginalValue(string identifier)
+        {
+            DimensionData.Metadata meta = this[identifier].MetaData;
+            return meta.maxValue;
+        }
+
+        public object getMinOriginalValue(string identifier)
+        {
+            DimensionData.Metadata meta = this[identifier].MetaData;
+            return meta.minValue;
+        }
+
         /// <summary>
         /// Load the header information for the data
         /// Post: The Identifier and Metadata.type values will be available for each dimension
